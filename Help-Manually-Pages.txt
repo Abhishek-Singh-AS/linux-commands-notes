@@ -1,0 +1,547 @@
+# Linux Learning – Class 01
+## Basic Commands, User Management, Manual Pages, Disk & Network Information
+
+**Operating System:** Red Hat Enterprise Linux (RHEL) 8  
+**Level:** Beginner  
+**Class:** 01
+
+---
+
+## 1. `whoami` – Check Current User
+
+**Meaning:** Displays the username of the user currently logged into the terminal.
+
+**Syntax:**
+```bash
+whoami
+```
+
+**Example:**
+```bash
+[abhi@localhost ~]$ whoami
+abhi
+```
+
+**Explanation:**
+- `abhi` is the current logged-in user.
+- This command is useful to check whether you are working as a normal user or root.
+
+**Real-world use:** Before executing administrative commands, Linux administrators check which user they are logged in as.
+
+---
+
+## 2. `ls` – List Files and Directories
+
+**Meaning:** Displays the files and directories available in the current location.
+
+**Syntax:**
+```bash
+ls
+```
+
+**Example:**
+```bash
+[abhi@localhost ~]$ ls
+Desktop Documents Downloads Music Pictures Public Templates Videos
+```
+
+**Explanation:** These are the directories available in the user's home directory.
+
+Useful variations:
+```bash
+ls -l       # Detailed file and directory information
+ls -a       # Show hidden files too
+ls -lh      # Show file sizes in readable format
+ls -la      # Detailed list including hidden files
+ls --list   # List format (where supported)
+```
+
+**Real-world use:** Checking configuration files, directories, logs and application files on a server.
+
+---
+
+## 3. `su -` – Switch User
+
+**Meaning:** Switches to another user account. Without a username, it switches to root.
+
+**Syntax:**
+```bash
+su -
+su - username
+```
+
+**Example:**
+```bash
+[abhi@localhost ~]$ su -
+Password:
+[root@localhost ~]#
+```
+
+**Explanation:**
+- `su` means substitute user.
+- `-` starts a login shell for the target user.
+- When no username is provided, root is selected.
+- You must enter the root password.
+
+Notice the prompt:
+- `$` = Normal user
+- `#` = Root user
+
+**Important:** Root has administrative privileges. Be careful when executing commands as root.
+
+**Real-world use:** Performing server administration, installing packages and managing system configuration.
+
+---
+
+## 4. `logout` – Exit a Login Shell
+
+**Meaning:** Ends the current login shell and returns to the previous shell, if one exists.
+
+**Syntax:**
+```bash
+logout
+```
+
+**Example:**
+```bash
+[root@localhost ~]# logout
+[abhi@localhost ~]$
+```
+
+**Explanation:** You switched from the root login shell back to your normal user shell.
+
+**Related command:**
+```bash
+exit
+```
+
+Both can exit a shell. `logout` is specifically intended for login shells.
+
+---
+
+## 5. `man` – Manual Pages
+
+**Meaning:** Opens the official manual documentation for Linux commands.
+
+**Syntax:**
+```bash
+man command_name
+```
+
+**Examples:**
+```bash
+man ls
+man lsblk
+man sshd
+man route
+man passwd
+man man
+```
+
+**Explanation:** The manual explains:
+- What the command does.
+- Its syntax.
+- Available options.
+- Examples and related information.
+
+**Useful keys inside a manual:**
+- `Space` = Next page
+- `b` = Previous page
+- `/keyword` = Search for a keyword
+- `n` = Next search result
+- `q` = Quit manual
+
+### Important: Why `man cd` may not work as expected
+
+`cd` is a shell built-in command, not a standalone executable.
+
+Use:
+```bash
+help cd
+man bash
+```
+
+---
+
+## 6. `lsblk` – List Block Devices
+
+**Meaning:** Displays storage devices such as hard disks, SSDs, partitions and logical volumes.
+
+**Syntax:**
+```bash
+lsblk
+```
+
+**Example:**
+```bash
+lsblk
+```
+
+Your system showed:
+```text
+NAME          SIZE TYPE MOUNTPOINT
+sr0           9.4G rom  /run/media/abhi/RHEL-8-4-0-BaseOS-x86_64
+nvme0n1        20G disk
+├─nvme0n1p1     1G part /boot
+└─nvme0n1p2    19G part
+  ├─rhel-root  17G lvm  /
+  └─rhel-swap   2G lvm  /swap
+```
+
+### Understand the output
+
+| Name | Meaning |
+|---|---|
+| `sr0` | Optical/virtual CD-ROM device |
+| `nvme0n1` | Main NVMe storage disk |
+| `nvme0n1p1` | First partition |
+| `nvme0n1p2` | Second partition |
+| `rhel-root` | Root logical volume |
+| `rhel-swap` | Swap logical volume |
+
+### Important columns
+
+- `NAME` = Device name.
+- `MAJ:MIN` = Major and minor device numbers.
+- `RM` = Whether the device is removable.
+- `SIZE` = Device size.
+- `RO` = Read-only status.
+- `TYPE` = Disk, partition, LVM, ROM, etc.
+- `MOUNTPOINT` = Where the device is mounted.
+
+**Real-world use:** Checking storage configuration and identifying disks before storage-related operations.
+
+---
+
+## 7. `lsblk -f` – Filesystem Information
+
+**Meaning:** Displays filesystem types, labels, UUIDs and mount points.
+
+**Syntax:**
+```bash
+lsblk -f
+```
+
+**Example:**
+```bash
+lsblk -f
+```
+
+Your output showed:
+- `xfs` = Filesystem type.
+- `UUID` = Unique identifier of a filesystem.
+- `LVM2_member` = Identifies a partition used by LVM.
+- `/boot` = Boot partition mount point.
+- `/` = Root filesystem mount point.
+- `/swap` = Swap logical volume mount point.
+
+### What is UUID?
+
+UUID stands for Universally Unique Identifier.
+
+Linux can use a filesystem UUID to identify a filesystem instead of relying only on device names.
+
+**Real-world use:** Checking filesystems and identifying storage when configuring `/etc/fstab`.
+
+---
+
+## 8. `route` – Display IP Routing Table
+
+**Meaning:** Displays the system's IP routing table.
+
+**Syntax:**
+```bash
+route
+```
+
+**Example:**
+```text
+Destination     Gateway         Genmask         Flags Metric Iface
+default         _gateway        0.0.0.0         UG    100    0 ens160
+192.168.1.0     0.0.0.0         255.255.255.0   U     100    0 ens160
+192.168.122.0   0.0.0.0         255.255.255.0   U       0    0 virbr0
+```
+
+### Understand the output
+
+- `Destination` = Destination network.
+- `Gateway` = Next-hop router.
+- `Genmask` = Network subnet mask.
+- `Flags` = Route status.
+- `Metric` = Route priority/cost.
+- `Iface` = Network interface used.
+
+Important flags:
+- `U` = Route is up.
+- `G` = Route uses a gateway.
+
+**Important:** `default` means traffic without a more specific matching route uses the default gateway.
+
+### Modern alternative
+
+The `route` command is an older networking utility.
+
+Use:
+```bash
+ip route
+```
+
+**Real-world use:** Troubleshooting network connectivity, gateways and routing problems on servers.
+
+---
+
+## 9. `whatis` – Short Command Description
+
+**Meaning:** Displays a one-line description of a command from the manual-page database.
+
+**Syntax:**
+```bash
+whatis command_name
+```
+
+**Examples:**
+```bash
+whatis lsblk
+whatis route
+```
+
+Output:
+```text
+lsblk (8) - list block devices
+route (8) - show / manipulate the IP routing table
+```
+
+### What does `(8)` mean?
+
+It indicates the manual section.
+
+Section 8 generally contains system administration commands.
+
+**Real-world use:** Quickly understanding an unfamiliar Linux command without opening its complete manual.
+
+---
+
+## 10. `whereis` – Locate Command Files
+
+**Meaning:** Finds the binary, source and manual-page locations associated with a command.
+
+**Syntax:**
+```bash
+whereis command_name
+```
+
+**Example:**
+```bash
+whereis route
+```
+
+Output:
+```text
+route: /usr/sbin/route /usr/share/man/man8/route.8.gz
+```
+
+**Explanation:**
+- `/usr/sbin/route` = Command executable.
+- `/usr/share/man/man8/route.8.gz` = Compressed manual page.
+
+**Real-world use:** Finding where Linux stores system utilities and their documentation.
+
+---
+
+## 11. `mandb` – Update Manual Database
+
+**Meaning:** Creates or updates the index database used by manual-page search tools such as `whatis` and `apropos`.
+
+**Syntax:**
+```bash
+mandb
+```
+
+**Example:**
+```bash
+mandb
+```
+
+Your class also included:
+```bash
+mandb "for update"
+```
+
+Note: `"for update"` is simply an extra argument in that command. It is not the standard option for forcing an update. Use `mandb` to update the manual database.
+
+**Why is it needed?**
+
+Sometimes a newly installed command's manual page exists, but `whatis` cannot find its description because the index database is outdated.
+
+Running `mandb` rebuilds or updates that index.
+
+**Real-world use:** Updating manual-page indexes after installing or changing documentation packages.
+
+**Note:** Warnings about missing or incorrectly formatted manual pages do not necessarily mean that `mandb` has failed completely.
+
+---
+
+## 12. `man 5 passwd` – Manual Section 5
+
+**Meaning:** Opens the manual for the `/etc/passwd` file format.
+
+**Syntax:**
+```bash
+man 5 passwd
+```
+
+**Important difference:**
+```bash
+man passwd
+```
+Usually opens the passwd command manual (section 1).
+
+```bash
+man 5 passwd
+```
+Opens the passwd configuration-file format manual (section 5).
+
+### Common manual sections
+
+| Section | Purpose |
+|---|---|
+| 1 | User commands |
+| 2 | System calls |
+| 3 | Library functions |
+| 4 | Special files and devices |
+| 5 | File formats and configuration files |
+| 6 | Games |
+| 7 | Miscellaneous |
+| 8 | System administration commands |
+
+**Real-world use:** Understanding Linux configuration files and administrative utilities.
+
+---
+
+## 13. `lsblk --list` – List Block Devices
+
+**Meaning:** Displays block devices in a flat list instead of the normal tree structure.
+
+**Syntax:**
+```bash
+lsblk --list
+```
+
+Short option:
+```bash
+lsblk -l
+```
+
+Your class used:
+```bash
+lsblk --l
+```
+
+Prefer the documented forms `lsblk -l` or `lsblk --list`.
+
+**Difference:**
+
+```bash
+lsblk
+```
+Displays the parent-child relationship between disks and partitions.
+
+```bash
+lsblk -l
+```
+Displays devices in a flat list.
+
+**Real-world use:** Quickly listing storage devices when the tree view is not required.
+
+---
+
+# 4. Important Linux concepts learned
+
+### A. What is LVM?
+
+LVM stands for Logical Volume Manager.
+
+It allows Linux administrators to manage storage using logical volumes rather than relying only on fixed disk partitions.
+
+Your system contains:
+- `rhel-root` = Root logical volume.
+- `rhel-swap` = Swap logical volume.
+
+### B. What is Swap?
+
+Swap is disk space used as an extension of virtual memory when required.
+
+Your system has a 2 GB swap logical volume.
+
+### C. What is XFS?
+
+XFS is a Linux filesystem designed for reliable and scalable storage management.
+
+Your `/boot` and root filesystems are using XFS.
+
+### D. What is a Mount Point?
+
+A mount point is a directory where a filesystem becomes accessible.
+
+Examples:
+- `/` = Root filesystem.
+- `/boot` = Boot files.
+- `/run/media/...` = Mounted installation media.
+
+### E. What is a Network Interface?
+
+A network interface connects the system to a network.
+
+In your output:
+- `ens160` = Network interface.
+- `virbr0` = Virtual bridge interface.
+
+---
+
+# 5. Quick revision – Class 01
+
+| Task | Command |
+|---|---|
+| Check current user | `whoami` |
+| List files | `ls` |
+| Switch to root | `su -` |
+| Exit login shell | `logout` |
+| Open manual | `man ls` |
+| Display disks | `lsblk` |
+| Display filesystem details | `lsblk -f` |
+| Display storage as a list | `lsblk -l` |
+| Display routing table | `route` |
+| Modern routing command | `ip route` |
+| Short command description | `whatis lsblk` |
+| Find command location | `whereis route` |
+| Update manual database | `mandb` |
+| Open passwd file manual | `man 5 passwd` |
+| Get help for shell built-in | `help cd` |
+
+---
+
+# 6. Practical exercises
+
+Try these commands yourself on your RHEL machine:
+
+1. Check which user you are currently using.
+2. Switch to root and check the username again.
+3. Display all hidden files in your home directory.
+4. Display all disks and partitions.
+5. Display filesystem types and UUIDs.
+6. Find the location of the `lsblk` command.
+7. Find a short description of `passwd`.
+8. Open the manual for the `ip` command.
+9. Display your current IP routing table.
+10. Open the manual for the `/etc/passwd` file format.
+
+**Safety:** These exercises are mostly read-only. Do not experiment with disk formatting, partition deletion or filesystem modification on your working machine.
+
+---
+
+**End of Class 01**
+
+Next class: Add the next commands and concepts from your YouTube lecture.
+
+**Repository:** linux-commands-notes  
+**File:** `01-basic-commands/class-01-basic-commands.md`
